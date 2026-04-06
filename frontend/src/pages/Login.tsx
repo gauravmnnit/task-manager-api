@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import api from '../api/axios'
-import { saveToken } from '../utils/auth'
+import api from '../api/axios.js'
+import { saveToken } from '../utils/auth.js'
 
 export default function Login() {
   const [email, setEmail] = useState('')
@@ -23,22 +23,72 @@ export default function Login() {
   }
 
   return (
-    <div className="max-w-md mx-auto mt-12">
-      <h2 className="text-xl font-semibold mb-4">Login</h2>
-      <form onSubmit={submit} className="space-y-3">
-        <div>
-          <label className="block text-sm">Email</label>
-          <input value={email} onChange={(e) => setEmail(e.target.value)} className="w-full border px-2 py-1 rounded" />
+    <div className="min-h-screen flex items-center justify-center px-4 py-12">
+      <div className="w-full max-w-md">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full mb-4">
+            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+            </svg>
+          </div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h1>
+          <p className="text-gray-600">Sign in to your account</p>
         </div>
-        <div>
-          <label className="block text-sm">Password</label>
-          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full border px-2 py-1 rounded" />
+
+        {/* Login Form */}
+        <div className="card">
+          <form onSubmit={submit} className="space-y-6">
+            <div>
+              <label className="label">Email Address</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="input-field"
+                placeholder="Enter your email"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="label">Password</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="input-field"
+                placeholder="Enter your password"
+                required
+              />
+            </div>
+
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+                <div className="flex items-center">
+                  <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                  {error}
+                </div>
+              </div>
+            )}
+
+            <button type="submit" className="btn-primary w-full">
+              Sign In
+            </button>
+          </form>
+
+          <div className="mt-6 text-center">
+            <p className="text-gray-600">
+              Don't have an account?{' '}
+              <a href="/register" className="text-blue-600 hover:text-blue-700 font-medium transition-colors duration-200">
+                Create one here
+              </a>
+            </p>
+          </div>
         </div>
-        {error && <div className="text-red-600">{error}</div>}
-        <div>
-          <button className="px-4 py-2 bg-indigo-600 text-white rounded">Login</button>
-        </div>
-      </form>
+      </div>
     </div>
   )
 }

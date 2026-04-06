@@ -9,6 +9,9 @@ const taskSchema = mongoose.Schema({
         type:Boolean,
         default:false
     },
+    completedAt:{
+        type:Date
+    },
     owner:{
         type:mongoose.Schema.Types.ObjectId,
         required:true,

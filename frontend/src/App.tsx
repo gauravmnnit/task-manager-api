@@ -1,12 +1,14 @@
 import React from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
-import Home from './pages/Home'
-import Login from './pages/Login'
-import Register from './pages/Register'
-import Dashboard from './pages/Dashboard'
-import Profile from './pages/Profile'
-import Header from './components/Header'
-import { getToken } from './utils/auth'
+import { Toaster } from 'react-hot-toast'
+import Home from './pages/Home.js'
+import Login from './pages/Login.js'
+import Register from './pages/Register.js'
+import Dashboard from './pages/Dashboard.js'
+import Profile from './pages/Profile.js'
+import Analytics from './pages/Analytics.js'
+import Header from './components/Header.js'
+import { getToken } from './utils/auth.js'
 
 const ProtectedRoute: React.FC<{ children: React.ReactElement }> = ({ children }) => {
   const token = getToken()
@@ -39,8 +41,33 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/analytics"
+            element={
+              <ProtectedRoute>
+                <Analytics />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </main>
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: '#363636',
+            color: '#fff',
+          },
+          success: {
+            duration: 3000,
+            iconTheme: {
+              primary: '#10B981',
+              secondary: '#fff',
+            },
+          },
+        }}
+      />
     </div>
   )
 }
