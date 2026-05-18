@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '../api/axios.js'
 import { Link } from 'react-router-dom'
+import AITaskForm from '../components/AITaskForm.jsx'
 
 type Task = {
   _id: string
@@ -107,6 +108,8 @@ export default function Dashboard() {
           </Link>
         </div>
       </div>
+
+      <AITaskForm />
 
       {/* Add Task Form */}
       <div className="card mb-8">

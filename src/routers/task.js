@@ -3,6 +3,44 @@ const Task=require('../models/task')
 const auth=require('../middleware/auth')
 const { sendTaskCreatedEmail, sendTaskCompletedEmail } = require('../emails/account')
 const router=new express.Router()
+const {
+  generateTaskMetadata,
+  parseNaturalLanguageTask,
+  generateProductivitySummary,
+} = require("../services/aiService");
+
+router.post('/tasks/ai', auth, async (req, res) => {
+
+    try {
+
+        console.log('AI ROUTE HIT')
+
+        const { description } = req.body
+
+        const aiData = await generateTaskMetadata(description)
+
+        const task = new Task({
+            description,
+            completed: false,
+            category: aiData.category,
+            priority: aiData.priority,
+            subtasks: aiData.subtasks,
+            owner: req.user._id
+        })
+
+        await task.save()
+
+        res.status(201).send(task)
+
+    } catch (e) {
+
+        console.log(e)
+
+        res.status(500).send({
+            error: 'AI task creation failed'
+        })
+    }
+})
 
 router.post('/tasks', auth, async (req, res)=>{
     const task = new Task({

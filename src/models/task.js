@@ -16,7 +16,18 @@ const taskSchema = mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         required:true,
         ref:'User'
-    }
+    },
+    category: {
+    type: String
+    },
+
+    priority: {
+        type: String
+    },
+
+    subtasks: [{
+        type: String
+    }],
 },{
     timestamps: true
 })
