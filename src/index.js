@@ -10,7 +10,7 @@ const cors = require("cors");
 
 app.use(
   cors({
-    origin: "https://task-manager-api-hckt-7ywfivxy4-gaurav-s-projects19.vercel.app",
+    origin: "https://task-manager-api-hckt.vercel.app/",
     credentials: true,
   })
 );
