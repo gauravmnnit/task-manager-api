@@ -48,8 +48,6 @@ const AITaskForm = ({ }) => {
 
     <div className="ai-task-form">
 
-        <h3>Create AI Task</h3>
-
         {/* Add Task Form */}
         <div className="card mb-8">
             <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">

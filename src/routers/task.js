@@ -7,7 +7,7 @@ const {
   generateTaskMetadata,
   parseNaturalLanguageTask,
   generateProductivitySummary,
-} = require("../services/aiService");
+} = require("../services/aiService.js");
 
 router.post('/tasks/ai', auth, async (req, res) => {
 

@@ -1,0 +1,14 @@
+server:
+  port: ${PORT:8080}
+
+spring:
+  data:
+    mongodb:
+      uri: ${MONGODB_URL:mongodb://127.0.0.1:27017/tasks-api}
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:thisismynewcourse}
+  sendgrid:
+    apikey: ${SENDGRID_API_KEY:}
+  from-email: ${FROM_EMAIL:no-reply@example.com}

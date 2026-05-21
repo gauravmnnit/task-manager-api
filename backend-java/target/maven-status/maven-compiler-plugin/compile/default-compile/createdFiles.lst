@@ -1,0 +1,12 @@
+com\gaurav\taskmanager\controller\TaskController.class
+com\gaurav\taskmanager\config\SecurityConfig.class
+com\gaurav\taskmanager\controller\UserController.class
+com\gaurav\taskmanager\model\Task.class
+com\gaurav\taskmanager\TaskManagerApplication.class
+com\gaurav\taskmanager\config\WebConfig.class
+com\gaurav\taskmanager\repository\TaskRepository.class
+com\gaurav\taskmanager\repository\UserRepository.class
+com\gaurav\taskmanager\model\User.class
+com\gaurav\taskmanager\controller\UserController$1.class
+com\gaurav\taskmanager\controller\RootController.class
+com\gaurav\taskmanager\util\JwtUtil.class
