@@ -6,6 +6,15 @@ const taskRouter=require('./routers/task')
 const app=express()
 const port = process.env.PORT || 3000
 
+const cors = require("cors");
+
+app.use(
+  cors({
+    origin: "https://task-manager-api-hckt-7ywfivxy4-gaurav-s-projects19.vercel.app",
+    credentials: true,
+  })
+);
+
 app.use(express.json())
 // Simple CORS middleware to allow frontend dev server to talk to backend
 app.use((req, res, next) => {
