@@ -1,54 +1,50 @@
-const OpenAI = require("openai");
+const Groq = require("groq-sdk");
 
-// ✅ Fix #11 — Validate API key at startup, fail fast and clearly
-if (!process.env.OPENAI_API_KEY) {
-  throw new Error("OPENAI_API_KEY is not set. AI features will not work.");
-}
-
-// ✅ Fix #12 — Single model constant; change once to upgrade everywhere
-const AI_MODEL = "gpt-4.1-mini";
-
-// ✅ Fix #7 — Configure timeout and retries on the shared client
-const client = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-  timeout: 15000, // 15 seconds
-  maxRetries: 2,
+const client = new Groq({
+  apiKey: process.env.GROQ_API_KEY,
 });
 
+const FALLBACK_METADATA = {
+  category: "Personal",
+  priority: "Medium",
+  subtasks: ["Plan task", "Execute task", "Review progress"],
+};
+
 /**
- * Generate AI metadata for a task.
- *
- * @param {string} taskDescription
- * @returns {Promise<{
- *   category: string,
- *   priority: "High"|"Medium"|"Low",
- *   subtasks: string[],
- *   aiError?: true
- * }>}
+ * Generate AI metadata for a task
+ * Returns:
+ * {
+ *   category,
+ *   priority,
+ *   subtasks
+ * }
  */
 async function generateTaskMetadata(taskDescription) {
   try {
     const response = await client.chat.completions.create({
-      model: AI_MODEL, // ✅ Fix #2 — consistent model name
+      model: "llama3-8b-8192",
 
-      // ✅ Fix #3 — enforce structured JSON output
       response_format: { type: "json_object" },
 
       messages: [
         {
           role: "system",
-          // ✅ Fix #3 — explicit JSON schema in prompt so parsing is safe
           content: `
-You are a task categorisation assistant.
+You are a task management assistant.
+Analyze the given task and return STRICT JSON only.
 
-Return STRICT JSON only — no prose, no markdown.
-
-Schema:
+Format:
 {
-  "category": "<single category string e.g. Work / Study / Health / Personal>",
-  "priority": "High" | "Medium" | "Low",
-  "subtasks": ["<subtask 1>", "<subtask 2>", "<subtask 3>"]
+  "category": "",
+  "priority": "",
+  "subtasks": ["", "", ""]
 }
+
+Rules:
+- category must be one of: Work, Personal, Health, Study, Finance, Shopping, Social, Other
+- priority must be one of: High, Medium, Low
+- subtasks must be an array of exactly 3 short actionable steps
+- Return JSON only, no markdown, no explanation
 `,
         },
         {
@@ -60,61 +56,39 @@ Schema:
       temperature: 0.3,
     });
 
-    // ✅ Fix #1 — actually parse and return the AI response
-    const raw = response.choices[0].message.content;
-
-    // ✅ Fix #5 — isolate JSON.parse so a bad response doesn't escape the catch
-    try {
-      const parsed = JSON.parse(raw);
-      return {
-        category: parsed.category ?? "Personal",
-        priority: parsed.priority ?? "Medium",
-        subtasks: Array.isArray(parsed.subtasks) ? parsed.subtasks : [],
-      };
-    } catch {
-      console.error("generateTaskMetadata — JSON parse failed. Raw:", raw);
-      return {
-        category: "Personal",
-        priority: "Medium",
-        subtasks: ["Plan task", "Execute task", "Review progress"],
-        aiError: true, // ✅ Fix #10 — signal to caller that AI output failed
-      };
-    }
-  } catch (e) {
-    // ✅ Fix #8 — use console.error, not console.log, for errors
-    // ✅ Fix #9 — removed raw console.log(response) debug statement
-    console.error("generateTaskMetadata error:", e);
+    const parsed = JSON.parse(response.choices[0].message.content);
 
     return {
-      category: "Personal",
-      priority: "Medium",
-      subtasks: ["Plan task", "Execute task", "Review progress"],
-      aiError: true, // ✅ Fix #10
+      category: parsed.category || FALLBACK_METADATA.category,
+      priority: parsed.priority || FALLBACK_METADATA.priority,
+      subtasks:
+        Array.isArray(parsed.subtasks) && parsed.subtasks.length > 0
+          ? parsed.subtasks
+          : FALLBACK_METADATA.subtasks,
     };
+  } catch (e) {
+    console.error("generateTaskMetadata Error:", e.message);
+    return FALLBACK_METADATA;
   }
 }
 
 /**
- * Parse a natural-language task string into structured data.
+ * Natural language task parser
  *
- * Example input : "Finish Oracle prep next Friday at 6 PM"
- * Example output: { title, dueDate, priority }
+ * Example:
+ * "Finish Oracle prep next Friday at 6 PM"
  *
- * @param {string} inputText
- * @returns {Promise<{
- *   title: string,
- *   dueDate: string|null,
- *   priority: "High"|"Medium"|"Low",
- *   aiError?: true
- * }>}
+ * Returns:
+ * {
+ *   title,
+ *   dueDate,
+ *   priority
+ * }
  */
 async function parseNaturalLanguageTask(inputText) {
-  // ✅ Fix #4 — inject today's date so relative dates ("next Friday") resolve correctly
-  const today = new Date().toISOString();
-
   try {
     const response = await client.chat.completions.create({
-      model: AI_MODEL,
+      model: "llama3-8b-8192",
 
       response_format: { type: "json_object" },
 
@@ -122,23 +96,21 @@ async function parseNaturalLanguageTask(inputText) {
         {
           role: "system",
           content: `
-You are a task extraction assistant. Today's date is ${today}.
-
 Extract structured task data from the user's input.
+Return STRICT JSON only, no markdown, no explanation.
 
-Return STRICT JSON only — no prose, no markdown.
-
-Schema:
+Format:
 {
-  "title": "<concise task title>",
-  "dueDate": "<ISO 8601 datetime string, or null if not mentioned>",
-  "priority": "High" | "Medium" | "Low"
+  "title": "",
+  "dueDate": "",
+  "priority": ""
 }
 
 Rules:
-- Resolve all relative dates (today, tomorrow, next Friday, etc.) using today's date above.
-- If no due date is mentioned, set dueDate to null.
-- If no priority is mentioned, infer it from urgency words or default to "Medium".
+- title should be a clean short task title extracted from the input
+- dueDate should be in ISO 8601 format (e.g. 2026-05-27T18:00:00.000Z), or null if not mentioned
+- priority must be High, Medium, or Low based on urgency words in the input
+- Current date for reference: ${new Date().toISOString()}
 `,
         },
         {
@@ -150,61 +122,43 @@ Rules:
       temperature: 0.2,
     });
 
-    const raw = response.choices[0].message.content;
-
-    // ✅ Fix #5 — isolated JSON.parse with its own error handling
-    try {
-      return JSON.parse(raw);
-    } catch {
-      console.error("parseNaturalLanguageTask — JSON parse failed. Raw:", raw);
-      return { title: inputText, dueDate: null, priority: "Medium", aiError: true };
-    }
+    return JSON.parse(response.choices[0].message.content);
   } catch (error) {
-    console.error("parseNaturalLanguageTask error:", error);
+    console.error("parseNaturalLanguageTask Error:", error.message);
     return {
       title: inputText,
       dueDate: null,
       priority: "Medium",
-      aiError: true, // ✅ Fix #10
     };
   }
 }
 
 /**
- * Generate a short productivity summary for a list of tasks.
- *
- * @param {Array<{ title: string, completed: boolean, priority: string, category: string }>} tasks
- * @returns {Promise<string>}
+ * AI productivity summary
  */
 async function generateProductivitySummary(tasks) {
-  // ✅ Fix #6 — guard against empty task list before hitting the API
-  if (!tasks || tasks.length === 0) {
-    return "No tasks found. Add some tasks to get a productivity summary.";
-  }
-
-  const formattedTasks = tasks.map((task) => ({
-    title: task.title,
-    completed: task.completed,
-    priority: task.priority,
-    category: task.category,
-  }));
-
   try {
+    const formattedTasks = tasks.map((task) => ({
+      title: task.title,
+      completed: task.completed,
+      priority: task.priority,
+      category: task.category,
+    }));
+
     const response = await client.chat.completions.create({
-      model: AI_MODEL,
+      model: "llama3-8b-8192",
 
       messages: [
         {
           role: "system",
           content: `
 You are a productivity coach.
-
-Analyse the user's tasks and provide:
-- A brief productivity summary
+Analyze the user's task list and provide:
+- A short productivity summary
 - Pending work analysis
-- One concrete improvement suggestion
+- One actionable improvement suggestion
 
-Keep the entire response under 120 words. Plain text only — no bullet symbols or markdown.
+Keep the response under 120 words. Be concise and encouraging.
 `,
         },
         {
@@ -218,12 +172,8 @@ Keep the entire response under 120 words. Plain text only — no bullet symbols 
 
     return response.choices[0].message.content;
   } catch (error) {
-    console.error("generateProductivitySummary error:", error);
-    // ✅ Fix #10 — return a structured object so caller can detect the failure
-    return {
-      summary: "Unable to generate productivity summary.",
-      aiError: true,
-    };
+    console.error("generateProductivitySummary Error:", error.message);
+    return "Unable to generate productivity summary.";
   }
 }
 
