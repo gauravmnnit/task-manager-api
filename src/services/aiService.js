@@ -30,22 +30,22 @@ async function generateTaskMetadata(taskDescription) {
         {
           role: "system",
           content: `
-You are a task management assistant.
-Analyze the given task and return STRICT JSON only.
+                  You are a task management assistant.
+                  Analyze the given task and return STRICT JSON only.
 
-Format:
-{
-  "category": "",
-  "priority": "",
-  "subtasks": ["", "", ""]
-}
+                  Format:
+                  {
+                    "category": "",
+                    "priority": "",
+                    "subtasks": ["", "", ""]
+                  }
 
-Rules:
-- category must be one of: Work, Personal, Health, Study, Finance, Shopping, Social, Other
-- priority must be one of: High, Medium, Low
-- subtasks must be an array of exactly 3 short actionable steps
-- Return JSON only, no markdown, no explanation
-`,
+                  Rules:
+                  - category must be one of: Work, Personal, Health, Study, Finance, Shopping, Social, Other
+                  - priority must be one of: High, Medium, Low
+                  - subtasks must be an array of exactly 3 short actionable steps
+                  - Return JSON only, no markdown, no explanation
+            `,
         },
         {
           role: "user",
@@ -96,22 +96,22 @@ async function parseNaturalLanguageTask(inputText) {
         {
           role: "system",
           content: `
-Extract structured task data from the user's input.
-Return STRICT JSON only, no markdown, no explanation.
+                  Extract structured task data from the user's input.
+                  Return STRICT JSON only, no markdown, no explanation.
 
-Format:
-{
-  "title": "",
-  "dueDate": "",
-  "priority": ""
-}
+                  Format:
+                  {
+                    "title": "",
+                    "dueDate": "",
+                    "priority": ""
+                  }
 
-Rules:
-- title should be a clean short task title extracted from the input
-- dueDate should be in ISO 8601 format (e.g. 2026-05-27T18:00:00.000Z), or null if not mentioned
-- priority must be High, Medium, or Low based on urgency words in the input
-- Current date for reference: ${new Date().toISOString()}
-`,
+                  Rules:
+                  - title should be a clean short task title extracted from the input
+                  - dueDate should be in ISO 8601 format (e.g. 2026-05-27T18:00:00.000Z), or null if not mentioned
+                  - priority must be High, Medium, or Low based on urgency words in the input
+                  - Current date for reference: ${new Date().toISOString()}
+                  `,
         },
         {
           role: "user",
@@ -152,14 +152,14 @@ async function generateProductivitySummary(tasks) {
         {
           role: "system",
           content: `
-You are a productivity coach.
-Analyze the user's task list and provide:
-- A short productivity summary
-- Pending work analysis
-- One actionable improvement suggestion
+                  You are a productivity coach.
+                  Analyze the user's task list and provide:
+                  - A short productivity summary
+                  - Pending work analysis
+                  - One actionable improvement suggestion
 
-Keep the response under 120 words. Be concise and encouraging.
-`,
+                  Keep the response under 120 words. Be concise and encouraging.
+                  `,
         },
         {
           role: "user",

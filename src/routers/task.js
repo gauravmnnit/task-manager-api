@@ -17,7 +17,8 @@ router.post('/tasks/ai', auth, async (req, res) => {
 
         const { description } = req.body
 
-        const aiData = await generateTaskMetadata(description)
+        // const aiData = await generateTaskMetadata(description)
+        const aiData = await parseNaturalLanguageTask(description)
 
         const task = new Task({
             description,
