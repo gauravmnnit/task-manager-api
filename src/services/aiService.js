@@ -88,7 +88,7 @@ async function generateTaskMetadata(taskDescription) {
 async function parseNaturalLanguageTask(inputText) {
   try {
     const response = await client.chat.completions.create({
-      model: "llama3-8b-8192",
+      model: "llama-3.3-70b-versatile",
 
       response_format: { type: "json_object" },
 
@@ -146,7 +146,7 @@ async function generateProductivitySummary(tasks) {
     }));
 
     const response = await client.chat.completions.create({
-      model: "llama3-8b-8192",
+      model: "llama-3.3-70b-versatile",
 
       messages: [
         {
