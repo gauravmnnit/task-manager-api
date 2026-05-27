@@ -5,10 +5,22 @@ spring:
   data:
     mongodb:
       uri: ${MONGODB_URL:mongodb://127.0.0.1:27017/tasks-api}
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 1MB
+      max-request-size: 2MB
 
 app:
   jwt:
-    secret: ${JWT_SECRET:thisismynewcourse}
+    secret: ${JWT_SECRET:thisismynewcoursebackendjavaprojectsecretkey2024}
   sendgrid:
     apikey: ${SENDGRID_API_KEY:}
   from-email: ${FROM_EMAIL:no-reply@example.com}
+  groq:
+    apikey: ${GROQ_API_KEY:}
+  cors-origin: ${CORS_ORIGIN:*}
+
+logging:
+  level:
+    com.gaurav.taskmanager: DEBUG
